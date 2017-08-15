@@ -1,0 +1,23 @@
+{
+  "name": "wikigraph",
+  "version": "1.0.0",
+  "description": "Code for crawling and graphing Wikipedia",
+  "main": "index.js",
+    "dependencies": {
+    "bluebird": "^3.5.0",
+    "cheerio": "^0.22.0",
+    "config": "^1.26.1",
+    "mysql": "^2.13.0",
+    "request": "^2.81.0",
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "wiki",
+    "wikipedia",
+    "graph"
+  ],
+  "author": "Matthew Giesmann",
+  "license": "ISC"
+}

@@ -12,7 +12,7 @@ let hardLimit = 15;
 const queue = new Queue(3, Infinity);
 const addToQueue = function(URL) {
 	hardLimit--;
-	if (hardLimit==0) {
+	if (hardLimit<=0) {
 		return;
 	}
 

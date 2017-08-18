@@ -13,26 +13,21 @@ const checkWikiPage = function(pageURL, domain) {
 	.then(function(result){
 		return processWikiPage(result, domain)
 	});
-	//.then(function(result){
-	//	logger.debug(result.links);
-	//});
 };
 
 const processWikiPage = function($, domain) {
-	domain = (typeof domain !== 'undefined') ?  domain : getWikiDomain($('[rel="canonical"]').first().attr('href'));
 	return new Promise(function(resolve, reject) { 
 		let results = {links: [], specialLinks: [], nonDomainLinks: []};
 		$('a').each(function (i, elem) {
 			const URL = $(this).attr('href');
-			if (isDomainLink(URL, domain)) {
-				if (isSpecialLink(URL, domain)) {
-					results.specialLinks.push(getFullWikiLink(URL, domain));
-				}
-				else {
-					results.links.push(getFullWikiLink(URL, domain));
-				}
+
+			//logger.debug(''+isFollowLink(URL, domain)+'|'+isDomainLink(URL, domain)+'|'+isSpecialLink(URL, domain)+'|'+isDiscardLink(URL, domain)+'|'+URL)
+			if (isFollowLink(URL, domain)) {
+				results.links.push(getFullWikiLink(URL, domain));
+				//results.links.push(getShortName(URL));
+			} else if (isSpecialLink(URL, domain)) {
+				//results.specialLinks.push(getFullWikiLink(URL, domain));
 			}
-			results.nonDomainLinks.push(URL);
 		});
 		resolve(results);
 	});
@@ -48,6 +43,10 @@ const getWikiDomain = function(URL) {
 };
 
 const getFullWikiLink = function(URL, domain) {
+	URL = encodeURI(URL);
+	if (!URL.includes('/')) {
+		return 'https://' + domain + '.wikipedia.org/wiki/' + URL;
+    }
 	if ((''+URL.split('/')[1]) == 'wiki') {
 		return 'https://' + domain + '.wikipedia.org' + URL;
     }
@@ -55,6 +54,11 @@ const getFullWikiLink = function(URL, domain) {
 		return 'https://' + URL;
     }
     return URL;
+};
+
+const getShortName = function(URL) {
+	const spl = URL.split('/');
+    return decodeURI(spl[spl.length - 1]);
 };
 
 const isDomainLink = function(URL, domain) {
@@ -72,9 +76,37 @@ const isDomainLink = function(URL, domain) {
 };
 
 const isSpecialLink = function(URL, domain) {
-	return getFullWikiLink(URL, domain).split('/')[4].includes(':');
+	try {
+		return getFullWikiLink(URL, domain).split('/')[4].includes(':');
+	}
+	catch(ex) {
+		return false;
+	}
+};
+
+// mobile links, /w/ links
+const isDiscardLink = function(URL, domain) {
+	try {
+		return (URL.includes('/w/')||getFullWikiLink(URL, domain).split('/')[4].includes('.m.'));
+	}
+	catch(ex) {
+		return true;
+	}
+};
+
+// only links in the domain that are not special or mobile should be followed
+const isFollowLink = function(URL, domain) { 
+	try {
+		return (isDomainLink(URL, domain) && !isSpecialLink(URL, domain) && !isDiscardLink(URL, domain));
+	}
+	catch(ex) {
+		return false;
+	}
 };
 
 exports.checkWikiPage = checkWikiPage;
 exports.processWikiPage = processWikiPage;
 exports.isDomainLink = isDomainLink;
+exports.isFollowLink = isFollowLink;
+exports.getFullWikiLink = getFullWikiLink;
+exports.isDomainLink = getShortName;

@@ -18,12 +18,22 @@ const checkWikiPage = function(pageURL, domain) {
 const processWikiPage = function($, domain) {
 	return new Promise(function(resolve, reject) { 
 		let results = {links: [], specialLinks: [], nonDomainLinks: []};
+
+		logger.debug($);
+
+		const isRedirect = $('ul .redirectText');
+
+		if (isRedirect) {
+			logger.info('redirect found:');
+		}
+
+
 		$('a').each(function (i, elem) {
 			const URL = $(this).attr('href');
 
 			//logger.debug(''+isFollowLink(URL, domain)+'|'+isDomainLink(URL, domain)+'|'+isSpecialLink(URL, domain)+'|'+isDiscardLink(URL, domain)+'|'+URL)
 			if (isFollowLink(URL, domain)) {
-				results.links.push(getFullWikiLink(URL, domain));
+				results.links.push(getFullWikiLink(URL, domain)); //TODO handle redirects
 				//results.links.push(getShortName(URL));
 			} else if (isSpecialLink(URL, domain)) {
 				//results.specialLinks.push(getFullWikiLink(URL, domain));

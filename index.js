@@ -1,13 +1,12 @@
 "use strict"
 
 const logger = require('./logger.js');
-const processor = require("./pageProcessor.js");
+const db = require("./dbHandler.js");
 const checkWikiPage = require("./pageProcessor.js").checkWikiPage;
 const Promise = require('bluebird');
 const Queue = require('promise-queue')
-//Queue.configure(Promise);
 
-let hardLimit = 15;
+let hardLimit = 3;
 
 const queue = new Queue(3, Infinity);
 const addToQueue = function(URL) {
@@ -25,12 +24,6 @@ const addToQueue = function(URL) {
 	}))
 }
 
+logger.info('adding main page to queue');
 
-addToQueue('https://sco.wikipedia.org/wiki/Main_Page');
-
-/*queue.add(checkWikiPage('https://sco.wikipedia.org/wiki/Main_Page')
-	.then(function(result){
-		logger.debug(result.links);
-
-	})
-)*/
+addToQueue('https://sco.wikipedia.org/wiki/Main_Page')

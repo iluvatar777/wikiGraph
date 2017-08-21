@@ -6,23 +6,36 @@ const checkWikiPage = require("./pageProcessor.js").checkWikiPage;
 const Promise = require('bluebird');
 const Queue = require('promise-queue')
 
-let hardLimit = 3;
+let hardLimit = 5;
 
 const queue = new Queue(3, Infinity);
+
 const addToQueue = function(URL) {
 	hardLimit--;
 	if (hardLimit<=0) {
-		return;
+		return; // TODO 
 	}
 
-	queue.add(checkWikiPage(URL)
-	.then(function(result){
-		logger.debug(result.links);
-		for(let i = 0; i < result.links.length; i++) {
-			addToQueue(result.links[i]);
+	return queue.add(function() {
+		return checkWikiPage(URL);
+	})
+	.then(function(result) {
+		return processLinks(result.links);
+	})
+	.then(function(result) {
+		logger.warn('test' + URL);
+	});
+};
+
+const processLinks = function(links) {
+	return new Promise(function(resolve, reject) {  //TODO if only links are needed, checkWikiPage can just return links
+		logger.debug(links);
+		for(let i = 0; i < links.length; i++) {
+			addToQueue(links[i]);
 		}
-	}))
-}
+		resolve();
+	});
+};
 
 logger.info('adding main page to queue');
 

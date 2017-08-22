@@ -4,6 +4,20 @@ const mysql = require('mysql');
 const logger = require('winston');
 const Promise = require('bluebird');
 
+const processedPageInsert = function(processedWikiPage) {
+	const params = [processedWikiPage.domain, processedWikiPage.pageName, 1];
+	return query("INSERT INTO page(wiki, fullname, processed) VALUES(?,?,?) \
+					ON DUPLICATE KEY UPDATE processed = 1, processTime =  CURRENT_TIMESTAMP", 
+					params,processedWikiPage.requestURL)
+	/*.then(function(result) {
+		logger.debug("Insert/Update id = " + result.insertId)
+
+		return query("INSERT INTO page(wiki, fullname, processed) VALUES(?,?,?) \
+						ON DUPLICATE KEY UPDATE processed = 1, processTime =  CURRENT_TIMESTAMP", 
+						params,"");
+	});*/
+};
+
 let pool = '';
 
 const initConnectionPool = function() {
@@ -75,6 +89,7 @@ const test = function() {
 
 initConnectionPool();	// TODO move this elsewhere
 
+exports.processedPageInsert = processedPageInsert;
 exports.initConnectionPool = initConnectionPool;
 exports.closeConnectionPool = closeConnectionPool;
 exports.query = query;

@@ -17,29 +17,32 @@ const checkWikiPage = function(pageURL, domain) {
 
 const processWikiPage = function($, domain) {
 	return new Promise(function(resolve, reject) { 
-		let results = {links: [], specialLinks: [], nonDomainLinks: []};
-
-		logger.debug($);
-
 		const isRedirect = $('ul .redirectText');
+		const pageName = getShortName($.requestURL);
+		let processedWikiPage = {	links: [], 
+									specialLinks: [], 
+									nonDomainLinks: [], 
+									domain: domain,
+									isRedirect: isRedirect,
+									URL: $.requestURL,
+									pageName: pageName
+								};
 
 		if (isRedirect) {
-			logger.info('redirect found:');
+			logger.info('redirect found: ' + processedWikiPage.URL);
 		}
-
 
 		$('a').each(function (i, elem) {
 			const URL = $(this).attr('href');
 
 			//logger.debug(''+isFollowLink(URL, domain)+'|'+isDomainLink(URL, domain)+'|'+isSpecialLink(URL, domain)+'|'+isDiscardLink(URL, domain)+'|'+URL)
 			if (isFollowLink(URL, domain)) {
-				results.links.push(getFullWikiLink(URL, domain)); //TODO handle redirects
-				//results.links.push(getShortName(URL));
+				processedWikiPage.links.push(getFullWikiLink(URL, domain)); //TODO handle redirects
 			} else if (isSpecialLink(URL, domain)) {
-				//results.specialLinks.push(getFullWikiLink(URL, domain));
+				//processedWikiPage.specialLinks.push(getFullWikiLink(URL, domain));
 			}
 		});
-		resolve(results);
+		resolve(processedWikiPage);
 	});
 };
 

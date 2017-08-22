@@ -6,37 +6,40 @@ const checkWikiPage = require("./pageProcessor.js").checkWikiPage;
 const Promise = require('bluebird');
 const Queue = require('promise-queue')
 
-let hardLimit = 5;
+let hardLimit = 10;
 
 const queue = new Queue(3, Infinity);
 
 const addToQueue = function(URL) {
 	hardLimit--;
 	if (hardLimit<=0) {
-		return; // TODO 
+		return;
 	}
 
 	return queue.add(function() {
 		return checkWikiPage(URL);
 	})
-	.then(function(result) {
-		return processLinks(result.links);
+	.then(function(processedWikiPage) {
+		return processLinks(processedWikiPage);
+	})
+	.then(function(processedWikiPage) {
+		return db.processedPageInsert(processedWikiPage);	
 	})
 	.then(function(result) {
-		logger.warn('test' + URL);
+		logger.warn(result)
 	});
 };
 
-const processLinks = function(links) {
-	return new Promise(function(resolve, reject) {  //TODO if only links are needed, checkWikiPage can just return links
+const processLinks = function(processedWikiPage) {
+	const links = processedWikiPage.links;
+	return new Promise(function(resolve, reject) { 
 		logger.debug(links);
 		for(let i = 0; i < links.length; i++) {
 			addToQueue(links[i]);
 		}
-		resolve();
+		resolve(processedWikiPage);
 	});
 };
 
 logger.info('adding main page to queue');
-
 addToQueue('https://sco.wikipedia.org/wiki/Main_Page')

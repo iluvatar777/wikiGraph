@@ -3,18 +3,41 @@
 const mysql = require('mysql');
 const logger = require('winston');
 const Promise = require('bluebird');
+const getShortName = require("./pageProcessor.js").getShortName;
 
 const processedPageInsert = function(processedWikiPage) {
-	const params = [processedWikiPage.domain, processedWikiPage.pageName, 1];
+	const domain = processedWikiPage.domain;
+	const pageName = processedWikiPage.pageName;
+
 	return query("INSERT INTO page(wiki, fullname, processed) VALUES(?,?,?) \
 					ON DUPLICATE KEY UPDATE processed = 1, processTime =  CURRENT_TIMESTAMP", 
-					params,processedWikiPage.requestURL)
-	/*.then(function(result) {
-		logger.debug("Insert/Update id = " + result.insertId)
+					[domain, pageName, 1], 
+					processedWikiPage.requestURL)
+	.then(function(result) {
+		const destName = getShortName(processedWikiPage.links[1]);
+		const source = result.rows.insertId;
+		logger.debug('' + pageName + ' ('+ source + ') inserted. ');
 
-		return query("INSERT INTO page(wiki, fullname, processed) VALUES(?,?,?) \
-						ON DUPLICATE KEY UPDATE processed = 1, processTime =  CURRENT_TIMESTAMP", 
-						params,"");
+		return processedWikiPage.links.map(function(link) {
+			const linkedPage = getShortName(link);
+			logger.debug('  linked page: ' + linkedPage)
+			return query("INSERT IGNORE INTO page(wiki, fullname) VALUES(?,?)", 
+						[domain, linkedPage], 
+						{source: source, destName: destName})
+			/*.then(function(result2) {
+				const dest = result2.rows.insertId;
+				logger.debug(JSON.stringify(result2));
+				//logger.debug('    linking ' + source + ' > ' + result2.handle.destName + '(' + dest + ')');
+				//return query("INSERT IGNORE INTO link(source, destination) VALUES(?,?) ", [source, dest]);
+			});*/
+		}, {concurrency: 3});
+
+		/*return query("INSERT IGNORE INTO page(wiki, fullname) VALUES(?,?)", 
+						[domain, destName], 
+						{source: source, destName: destName});*/
+	})
+	/*.then(function(result) {
+		logger.debug(JSON.stringify(result));
 	});*/
 };
 

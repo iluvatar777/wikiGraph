@@ -20,10 +20,10 @@ const processWikiPage = function($, domain) {
 		const isRedirect = $('ul .redirectText');
 		const pageName = getShortName($.requestURL);
 		let processedWikiPage = {	links: [], 
-									specialLinks: [], 
-									nonDomainLinks: [], 
+									//specialLinks: [], 
+									//nonDomainLinks: [], 
 									domain: domain,
-									isRedirect: isRedirect,
+									//isRedirect: isRedirect,
 									URL: $.requestURL,
 									pageName: pageName
 								};
@@ -71,7 +71,7 @@ const getFullWikiLink = function(URL, domain) {
 
 const getShortName = function(URL) {
 	const spl = URL.split('/');
-    return decodeURI(spl[spl.length - 1]);
+    return decodeURI(spl[spl.length - 1]).split('#')[0];
 };
 
 const isDomainLink = function(URL, domain) {
@@ -122,4 +122,4 @@ exports.processWikiPage = processWikiPage;
 exports.isDomainLink = isDomainLink;
 exports.isFollowLink = isFollowLink;
 exports.getFullWikiLink = getFullWikiLink;
-exports.isDomainLink = getShortName;
+exports.getShortName = getShortName;

@@ -6,7 +6,7 @@ const checkWikiPage = require("./pageProcessor.js").checkWikiPage;
 const Promise = require('bluebird');
 const Queue = require('promise-queue')
 
-let hardLimit = 10;
+let hardLimit = 3;
 
 const queue = new Queue(3, Infinity);
 
@@ -26,14 +26,14 @@ const addToQueue = function(URL) {
 		return db.processedPageInsert(processedWikiPage);	
 	})
 	.then(function(result) {
-		logger.warn(result)
+		//logger.warn(result)
 	});
 };
 
 const processLinks = function(processedWikiPage) {
 	const links = processedWikiPage.links;
 	return new Promise(function(resolve, reject) { 
-		logger.debug(links);
+		logger.silly(links);
 		for(let i = 0; i < links.length; i++) {
 			addToQueue(links[i]);
 		}

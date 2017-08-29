@@ -6,15 +6,15 @@ const checkWikiPage = require("./pageProcessor.js").checkWikiPage;
 const Promise = require('bluebird');
 const Queue = require('promise-queue')
 
-let hardLimit = 3;
+let hardLimit = 5000;
 
 const queue = new Queue(3, Infinity);
 
 const addToQueue = function(URL) {
-	hardLimit--;
 	if (hardLimit<=0) {
 		return;
 	}
+	hardLimit--;
 
 	return queue.add(function() {
 		return checkWikiPage(URL);

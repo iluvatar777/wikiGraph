@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const logger = require('winston');
 const Promise = require('bluebird');
 const getShortName = require("./pageProcessor.js").getShortName;
+const delay = Promise.delay;
 
 const processedPageInsert = function(processedWikiPage) {
 	const domain = processedWikiPage.domain;
@@ -14,6 +15,17 @@ const processedPageInsert = function(processedWikiPage) {
 
 	const sql = "CALL pageInsert(?,?,?)"
 	return query(sql, [domain, shortName, links], 'test')
+	.catch(function(ex){
+		if (ex.code = 'ER_LOCK_DEADLOCK') {
+			logger.debug("ER_LOCK_DEADLOCK detected for " + shortName + '. will retry in 1500ms.');
+			return delay(1500).then(function(res){
+				logger.debug("Retry insert for " + shortName);
+				return query(sql, [domain, shortName, links], 'test');
+			});
+		}
+		logger.info("not ER_LOCK_DEADLOCK " + shorName)
+		throw ex;
+	});
 };
 
 let pool = '';

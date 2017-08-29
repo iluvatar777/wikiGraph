@@ -57,7 +57,6 @@ const getWikiDomain = function(URL) {
 };
 
 const getFullWikiLink = function(URL, domain) {
-	URL = encodeURI(URL);
 	if (!URL.includes('/')) {
 		return 'https://' + domain + '.wikipedia.org/wiki/' + URL;
     }

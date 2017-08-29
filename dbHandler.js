@@ -7,38 +7,13 @@ const getShortName = require("./pageProcessor.js").getShortName;
 
 const processedPageInsert = function(processedWikiPage) {
 	const domain = processedWikiPage.domain;
-	const pageName = processedWikiPage.pageName;
+	const shortName = getShortName(processedWikiPage.pageName);
+	//const jsonLinks = '['+processedWikiPage.links.map(function(link){return '{"destination": "' + getShortName(link) + '"}'}).join(',')+']';
+	const links = processedWikiPage.links.map(function(link){return getShortName(link)}).join(',')
+	logger.debug(domain + '|' + shortName + '|' + links)
 
-	return query("INSERT INTO page(wiki, fullname, processed) VALUES(?,?,?) \
-					ON DUPLICATE KEY UPDATE processed = 1, processTime =  CURRENT_TIMESTAMP", 
-					[domain, pageName, 1], 
-					processedWikiPage.requestURL)
-	.then(function(result) {
-		const destName = getShortName(processedWikiPage.links[1]);
-		const source = result.rows.insertId;
-		logger.debug('' + pageName + ' ('+ source + ') inserted. ');
-
-		return processedWikiPage.links.map(function(link) {
-			const linkedPage = getShortName(link);
-			logger.debug('  linked page: ' + linkedPage)
-			return query("INSERT IGNORE INTO page(wiki, fullname) VALUES(?,?)", 
-						[domain, linkedPage], 
-						{source: source, destName: destName})
-			/*.then(function(result2) {
-				const dest = result2.rows.insertId;
-				logger.debug(JSON.stringify(result2));
-				//logger.debug('    linking ' + source + ' > ' + result2.handle.destName + '(' + dest + ')');
-				//return query("INSERT IGNORE INTO link(source, destination) VALUES(?,?) ", [source, dest]);
-			});*/
-		}, {concurrency: 3});
-
-		/*return query("INSERT IGNORE INTO page(wiki, fullname) VALUES(?,?)", 
-						[domain, destName], 
-						{source: source, destName: destName});*/
-	})
-	/*.then(function(result) {
-		logger.debug(JSON.stringify(result));
-	});*/
+	const sql = "CALL pageInsert(?,?,?)"
+	return query(sql, [domain, shortName, links], 'test')
 };
 
 let pool = '';

@@ -25,6 +25,9 @@ const addToQueue = function(URL) {
 	.then(function(processedWikiPage) {
 		return db.processedPageInsert(processedWikiPage);	
 	})
+	.catch(function(err) {
+		logger.warn(JSON.stringify(err))
+	})
 	.then(function(result) {
 		//logger.warn(result)
 	});

@@ -42,6 +42,7 @@ const processWikiPage = function($, domain) {
 				//processedWikiPage.specialLinks.push(getFullWikiLink(URL, domain));
 			}
 		});
+		// TODO remove duplicate links
 		resolve(processedWikiPage);
 	});
 };
@@ -79,7 +80,7 @@ const isDomainLink = function(URL, domain) {
 		if (URL.split('/')[1] == 'wiki') {
 			return true;
 		}
-		if (URL.split('/')[2].split('.')[0] == domain.split('.')[0]){
+		if (URL.split('/')[2].split('.')[0] == domain.split('.')[0] && URL.split('/')[2].split('.')[1] == 'wikipedia'){
 			return true;
 		}
 	}

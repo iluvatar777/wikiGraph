@@ -17,19 +17,20 @@ const checkWikiPage = function(pageURL, domain) {
 
 const processWikiPage = function($, domain) {
 	return new Promise(function(resolve, reject) { 
-		const isRedirect = $('ul .redirectText');
+		const isRedirect = $('#contentSub > span.mw-redirectedfrom').length > 0;
+
 		const pageName = getShortName($.requestURL);
 		let processedWikiPage = {	links: [], 
 									//specialLinks: [], 
 									//nonDomainLinks: [], 
 									domain: domain,
-									//isRedirect: isRedirect,
+									isRedirect: isRedirect,
 									URL: $.requestURL,
 									pageName: pageName
 								};
 
 		if (isRedirect) {
-			logger.info('redirect found: ' + processedWikiPage.URL);
+			logger.debug('redirect found: ' + processedWikiPage.URL);
 		}
 
 		$('a').each(function (i, elem) {

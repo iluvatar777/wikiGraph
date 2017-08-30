@@ -11,7 +11,11 @@ let hardLimit = 5000;
 const queue = new Queue(3, Infinity);
 
 const addToQueue = function(URL) {
-	if (hardLimit<=0) {
+	if (hardLimit <= 0) {
+		if (hardLimit == 0) {
+			logger.info('Hardlimit has been reached. No more pages will be added to queue.')
+			hardLimit--;
+		}
 		return;
 	}
 	hardLimit--;
@@ -29,7 +33,7 @@ const addToQueue = function(URL) {
 		logger.warn(JSON.stringify(err))
 	})
 	.then(function(result) {
-		//logger.warn(result)
+		logger.info('Completed ' + URL);
 	});
 };
 

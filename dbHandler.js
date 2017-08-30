@@ -9,18 +9,18 @@ const delay = Promise.delay;
 const processedPageInsert = function(processedWikiPage) {
 	const domain = processedWikiPage.domain;
 	const shortName = getShortName(processedWikiPage.pageName);
-	//const jsonLinks = '['+processedWikiPage.links.map(function(link){return '{"destination": "' + getShortName(link) + '"}'}).join(',')+']';
-	const links = processedWikiPage.links.map(function(link){return getShortName(link)}).join(',')
-	logger.debug(domain + '|' + shortName + '|' + links)
+	const isRedirect = processedWikiPage.isRedirect;
+	const links = processedWikiPage.links.map(function(link){return getShortName(link)}).join(';')
+	logger.debug(domain + '|' + shortName + '|' + isRedirect + '|' + links)
 
-	const sql = "CALL pageInsert(?,?,?)"
-	return query(sql, [domain, shortName, links], 'test')
+	const sql = "CALL pageInsert(?,?,?,?)"
+	return query(sql, [domain, shortName, isRedirect, links], 'test')
 	.catch(function(ex){
 		if (ex.code = 'ER_LOCK_DEADLOCK') {
 			logger.debug("ER_LOCK_DEADLOCK detected for " + shortName + '. will retry in 1500ms.');
 			return delay(1500).then(function(res){
 				logger.debug("Retry insert for " + shortName);
-				return query(sql, [domain, shortName, links], 'test');
+				return query(sql, [domain, shortName, isRedirect, links], 'test');
 			});
 		}
 		logger.info("not ER_LOCK_DEADLOCK " + shorName)

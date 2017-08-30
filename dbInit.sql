@@ -7,13 +7,15 @@ DROP TABLE link;
 DROP TABLE redirect;
 DROP TABLE page;
 
-
-
 --DROP TABLE scratch;
 --CREATE TABLE scratch (
 --		val varchar(65535)
 --);
-		--INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId));
+--		INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId, '  ', linkList));
+--			INSERT INTO scratch(val) 
+--		    	SELECT CONCAT(@sourceId, ' ', p.id)
+--		    	FROM page p WHERE p.fullname = linkStr;
+
 
 CREATE TABLE IF NOT EXISTS page (
     id int NOT NULL AUTO_INCREMENT,
@@ -60,20 +62,21 @@ CREATE PROCEDURE pageInsert (
 			ON DUPLICATE KEY UPDATE processed = 1, processTime = CURRENT_TIMESTAMP;
 		SELECT id INTO @sourceId FROM page p WHERE p.wiki = wiki AND p.fullname = fullname;
 
-		  IF linkList IS NULL THEN
-		    SET linkList = '';
-		  END IF;
-
+		IF linkList IS NULL THEN
+		  SET linkList = '';
+		END IF;
+		
 		link_loop:
 		  LOOP
 		    SET strLen = LENGTH(linkList);
 		    SET SubStrLen = LENGTH(SUBSTRING_INDEX(linkList, ',', 1));
-		    SET linkStr = MID(linkList, 1, SubStrLen);
+		    SET linkStr = SUBSTRING_INDEX(linkList, ',', 1);
 
 		    INSERT IGNORE INTO page(wiki, fullname) VALUES (wiki, linkStr);
+
 		    INSERT IGNORE INTO link(source, destination) 
 		    	SELECT @sourceId, p.id
-		    	FROM page p WHERE fullname = linkStr;
+		    	FROM page p WHERE p.fullname = linkStr;
 		    
 		    SET linkList = MID(linkList, SubStrLen + 2, strLen);
 
@@ -81,6 +84,5 @@ CREATE PROCEDURE pageInsert (
 		      LEAVE link_loop;
 		    END IF;
 		  END LOOP link_loop;
-
 	END //
 DELIMITER ;

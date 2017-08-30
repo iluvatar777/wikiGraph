@@ -42,7 +42,7 @@ const processWikiPage = function($, domain) {
 				//processedWikiPage.specialLinks.push(getFullWikiLink(URL, domain));
 			}
 		});
-		// TODO remove duplicate links
+		processedWikiPage.links = processedWikiPage.links.filter(function(value, index, self) {return (self.indexOf(value) === index && value !== processedWikiPage.URL);})
 		resolve(processedWikiPage);
 	});
 };

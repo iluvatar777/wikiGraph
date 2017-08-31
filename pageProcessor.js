@@ -23,11 +23,15 @@ const processWikiPage = function($, domain) {
 	return new Promise(function(resolve, reject) { 
 		const isRedirect = $('#contentSub > span.mw-redirectedfrom').length > 0;
 
+		// TODO only relevent for redlinks, currently not loading these. <a href="/w/index.php?title=Nuclear_force&amp;action=edit&amp;redlink=1" class="new" title="Nuclear force (page disna exeest)">nuclear force</a>
+		//const exists = $('#mw-content-text  > div.mw-newarticletextanon, #mw-content-text  > div.noarticletext').length == 0;
+
 		const pageName = getShortName($.requestURL);
 		let processedWikiPage = {	links: [], 
 									//specialLinks: [], 
 									//nonDomainLinks: [], 
 									domain: domain,
+									//exists: exists,
 									isRedirect: isRedirect,
 									URL: $.requestURL,
 									pageName: pageName

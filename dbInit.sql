@@ -74,8 +74,8 @@ CREATE PROCEDURE pageInsert (
 		
 		link_loop:
 		  LOOP
-		    SET strLen = LENGTH(linkList);
-		    SET SubStrLen = LENGTH(SUBSTRING_INDEX(linkList, ';', 1));
+		    SET strLen = CHAR_LENGTH(linkList);
+		    SET SubStrLen = CHAR_LENGTH(SUBSTRING_INDEX(linkList, ';', 1));
 		    SET linkStr = SUBSTRING_INDEX(linkList, ';', 1);
 			
 			INSERT IGNORE INTO page(wiki, fullname) VALUES (wiki, linkStr);
@@ -114,8 +114,8 @@ CREATE PROCEDURE filterByProcessed (
 
 		link_loop:
 		  LOOP
-		    SET strLen = LENGTH(linkList);
-		    SET SubStrLen = LENGTH(SUBSTRING_INDEX(linkList, ';', 1));
+		    SET strLen = CHAR_LENGTH(linkList);
+		    SET SubStrLen = CHAR_LENGTH(SUBSTRING_INDEX(linkList, ';', 1));
 		    SET linkStr = SUBSTRING_INDEX(linkList, ';', 1);
 
 			SELECT @pages := COUNT(*) FROM page p

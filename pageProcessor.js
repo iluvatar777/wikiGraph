@@ -11,6 +11,9 @@ const checkWikiPage = function(pageURL, domain) {
 	//TODO clean URL, check if in DB, or if DB update needed.
 
 	return getPage(pageURL)
+	.catch(function(ex) {
+		logger.warn('checkWikiPage could not retrieve ' + pageURL)
+	})
 	.then(function(result){
 		return processWikiPage(result, domain)
 	});

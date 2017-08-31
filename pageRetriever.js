@@ -5,9 +5,11 @@ const request = require('request');
 const cheerio = require('cheerio');
 const logger = require('winston');
 
-const getPage = function(url) {
+const getPage = function(url, retries) {
+	retries = (typeof retries !== 'undefined') ?  retries : 2;
+
 	return new Promise(function(resolve, reject) { 
-		logger.debug("getPage attempt for " + url);
+		logger.debug('GetPage attempt for ' + url);
 		request.get({
 			    url: url
 			}, 
@@ -15,11 +17,19 @@ const getPage = function(url) {
 				if (!err && response.statusCode == 200) {
 					const O = cheerio.load(body);					// this could be confusing with timouts in the main promise chain
 					O.requestURL = url;
-					logger.debug("getPage Success for " + url);
+					logger.debug('getPage Success for ' + url);
 					resolve(O);
 				} else {
-					logger.warn('getPage Failure (' + err + ')  + for ' +  url);
-					reject(err);
+					if (retries > 0) {
+						logger.debug('getPage Retry for ' + url + '. remaining: ' + (retries - 1));
+						return new Promise(function(resolve, reject) { 
+							return getPage(url, retries - 1);
+						})
+					}
+					else {
+						logger.warn('getPage Failure (' + response.statusCode + ')  + for ' +  url);
+						reject(response);
+					}
 				}
 			}
 		);

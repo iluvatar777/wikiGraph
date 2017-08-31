@@ -20,7 +20,7 @@ const processedPageInsert = function(processedWikiPage) {
 			logger.debug("ER_LOCK_DEADLOCK detected for " + shortName + '. will retry in 1500ms.');
 			return delay(1500).then(function(res){
 				logger.debug("Retry insert for " + shortName);
-				return query(sql, [domain, shortName, isRedirect, links], 'test');
+				return query(sql, [domain, shortName, isRedirect, links], 'processedPageInsert');
 			});
 		}
 		logger.info("not ER_LOCK_DEADLOCK " + shorName)
@@ -40,7 +40,8 @@ const initConnectionPool = function() {
 	pool = mysql.createPool({
 		connectionLimit : 10,
 		host : 'localhost',
-		user : 'root'
+		user : 'root',
+		multipleStatements: true
 		//password : 'datasoft123'
 	});
 
@@ -62,20 +63,24 @@ const closeConnectionPool = function() {					// TODO not clean
 
 const query = function(sql, params, handle) {
 	return new Promise(function(resolve, reject) {
-		if (pool === '') {
-			reject(new Error('Query error - Db connection pool not initialized')); 
-		};
+		try {
+			if (pool === '') {
+				reject(new Error('Query error - Db connection pool not initialized')); 
+			};
 
 
-		logger.debug("Query: " + sql + " Params: " + JSON.stringify(params));
-		pool.query(sql, params, function(err, rows, fields) {
-				if (err) { 
-					err.handle = handle;
-					reject(err);
-				}
-				resolve({rows: rows, fields: fields, handle: handle});
-			});
-
+			logger.debug("Query: " + sql + " Params: " + JSON.stringify(params));
+			pool.query(sql, params, function(err, rows, fields) {
+					if (err) { 
+						err.handle = handle;
+						reject(err);
+					}
+					resolve({rows: rows, fields: fields, handle: handle});
+				});
+		}
+		catch(ex){
+			reject(ex);
+		}
 	});
 };
 

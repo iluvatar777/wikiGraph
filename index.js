@@ -19,6 +19,7 @@ const addToQueue = function(URL) {
 		return;
 	}
 	hardLimit--;
+	logger.silly('addToQueue: ' + URL)
 
 	return queue.add(function() {
 		return checkWikiPage(URL);
@@ -40,7 +41,6 @@ const addToQueue = function(URL) {
 const processLinks = function(processedWikiPage) {
 	const links = processedWikiPage.links;
 	return new Promise(function(resolve, reject) { 
-		logger.silly(links);
 		for(let i = 0; i < links.length; i++) {
 			addToQueue(links[i]);
 		}

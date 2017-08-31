@@ -1,11 +1,12 @@
 USE wikiGraph;
 		  
-SELECT COUNT(*), processed FROM page 
-	GROUP BY processed;
-							 
-SELECT COUNT(*) AS 'COUNT(*) of link' FROM link;
-
+SELECT COUNT(*), processed, isRedirect FROM page 
+	GROUP BY processed, isRedirect;
+						 
 SELECT * FROM page p;
+
+SELECT * FROM page p WHERE isRedirect = 1;
+
 
 SELECT l.source, l.destination, l.processTime, s.fullname, s.processed, d.fullname, d.processed 
 	FROM link l JOIN page s JOIN page d 
@@ -14,11 +15,14 @@ SELECT l.source, l.destination, l.processTime, s.fullname, s.processed, d.fullna
 SELECT l.source, l.destination, l.processTime, s.fullname, d.fullname, d.processed 
 	FROM link l JOIN page s JOIN page d 
 	ON l.source = s.id AND l.destination = d.id
-    WHERE s.fullname = 'Electron' OR d.fullname = 'Electron';
-
-SELECT COUNT(*), p.fullname FROM link l JOIN page p ON l.source = p.id
+    WHERE s.fullname = 'Electron' OR d.fullname = 'Electron';    
+    
+SELECT COUNT(*), p.fullname FROM link l JOIN page p ON l.source = p.id   
 	GROUP BY p.fullname
     ORDER BY COUNT(*) DESC;
+							
+                            
+SELECT COUNT(*) AS 'COUNT(*) of link' FROM link;
 
 SET @binSize = 10;
 SELECT (numLinks DIV @binSize) * @binSize + 1 AS 'Bin', 

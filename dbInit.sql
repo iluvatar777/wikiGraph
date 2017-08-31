@@ -3,6 +3,7 @@ CREATE DATABASE IF NOT EXISTS wikiGraph;
 USE wikiGraph;
 
 DROP PROCEDURE pageInsert;
+DROP PROCEDURE filterByProcessed;
 DROP TABLE link;
 DROP TABLE redirect;
 DROP TABLE page;
@@ -12,9 +13,12 @@ CREATE TABLE scratch (
 		val varchar(65535)
 );
 --		INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId, '  ', linkList));
---			INSERT INTO scratch(val) 
---		    	SELECT CONCAT(@sourceId, ' ', p.id)
---		    	FROM page p WHERE p.fullname = linkStr;
+--		INSERT INTO scratch(val) VALUES(CONCAT(linkStr, ': ', @pages, '  ', @pagesTEMP));
+--		IF linkStr LIKE '%,%' THEN
+--			INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId, '  ', linkStr, '  ', linkList));
+--		END IF;
+
+
 
 
 CREATE TABLE IF NOT EXISTS page (
@@ -86,5 +90,52 @@ CREATE PROCEDURE pageInsert (
 		      LEAVE link_loop;
 		    END IF;
 		  END LOOP link_loop;
+	END //
+
+CREATE PROCEDURE filterByProcessed (
+	    wiki varchar(4),
+		linkList varchar(65535),
+		staleTime timestamp,
+		OUT unprocessed varchar(65535),
+		OUT processed varchar(65535)
+	)
+	BEGIN
+		DECLARE strLen    INT DEFAULT 0;
+		DECLARE SubStrLen INT DEFAULT 0;
+		DECLARE linkStr   varchar(255) DEFAULT NULL;
+		DECLARE pages    INT DEFAULT 0;
+
+		IF staleTime IS NULL THEN
+			SET staleTime = CURRENT_TIMESTAMP - INTERVAL 1 WEEK;
+		END IF;
+
+		SET unprocessed = '';
+		SET processed = '';
+
+		link_loop:
+		  LOOP
+		    SET strLen = LENGTH(linkList);
+		    SET SubStrLen = LENGTH(SUBSTRING_INDEX(linkList, ';', 1));
+		    SET linkStr = SUBSTRING_INDEX(linkList, ';', 1);
+
+			SELECT @pages := COUNT(*) FROM page p
+				WHERE p.wiki = wiki AND p.fullname = linkStr 
+				AND (p.processed = 1 OR p.processTime < staleTime);
+
+			IF @pages = 0 THEN
+				SET unprocessed = CONCAT(unprocessed, ';', linkStr);
+			ELSE
+				SET processed = CONCAT(processed, ';', linkStr);
+			END IF;
+
+		    SET linkList = MID(linkList, SubStrLen + 2, strLen);
+
+		    IF linkList = '' THEN
+		      LEAVE link_loop;
+		    END IF;
+		  END LOOP link_loop;
+
+		  SET unprocessed = MID(unprocessed, 2, LENGTH(unprocessed));
+		  SET processed = MID(processed, 2, LENGTH(processed));
 	END //
 DELIMITER ;

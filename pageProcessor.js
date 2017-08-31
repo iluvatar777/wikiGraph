@@ -3,6 +3,7 @@
 const Promise = require('bluebird');
 const logger = require('winston');
 const getPage = require("./pageRetriever.js").getPage;
+const db = require("./dbHandler.js");
 
 
 const checkWikiPage = function(pageURL, domain) {
@@ -45,6 +46,26 @@ const processWikiPage = function($, domain) {
 		});
 		processedWikiPage.links = processedWikiPage.links.filter(function(value, index, self) {return (self.indexOf(value) === index && value !== processedWikiPage.URL);})
 		resolve(processedWikiPage);
+	})
+	.then(function(processedWikiPage){ // now, check the database to see which links are still unprocessed.
+		const links = processedWikiPage.links.map(function(link){return getShortName(link)}).join(';')
+		const sql = "CALL filterByProcessed(?,?,?,@unprocessed,@processed); SELECT @unprocessed, @processed;"
+
+		return db.query(sql, [processedWikiPage.domain, links, '1970-01-01 01:00:00', 'a', 'b'], 'processWikiPage')
+		.then(function(result){
+			return new Promise(function(resolve, reject) { 
+				try {
+					processedWikiPage.links = result.rows[result.rows.length-1][0]['@unprocessed'].split(';').map(function(val) {return getFullWikiLink(val, processedWikiPage.domain)}).filter(function(link){return link !== 'https://sco.wikipedia.org/wiki/';});;
+					processedWikiPage.processedLinks = result.rows[result.rows.length-1][0]['@processed'].split(';').map(function(val) {return getFullWikiLink(val, processedWikiPage.domain)});
+					logger.debug('Processed page ' + processedWikiPage.URL + '. Found unprocessed links: ' + JSON.stringify(processedWikiPage.links));
+					logger.silly('  links already processed: ' + processedWikiPage.processedLinks);
+					resolve(processedWikiPage);
+				}
+				catch(ex) {
+					reject(ex);
+				}
+			});
+		})
 	});
 };
 
@@ -101,7 +122,7 @@ const isSpecialLink = function(URL, domain) {
 // mobile links, /w/ links
 const isDiscardLink = function(URL, domain) {
 	try {
-		return (URL.includes('/w/')||getFullWikiLink(URL, domain).split('/')[4].includes('.m.'));
+		return (URL.includes('/w/')||getFullWikiLink(URL, domain).split('/')[4].includes('.m.')||URL=='');
 	}
 	catch(ex) {
 		return true;

@@ -11,7 +11,7 @@ const getPage = function(url, retries) {
 	return new Promise(function(resolve, reject) { 
 		logger.debug('GetPage attempt for ' + url);
 		request.get({
-			    url: url
+			    url: encodeURI(url)
 			}, 
 			function(err, response, body) {
 				if (!err && response.statusCode == 200) {
@@ -19,9 +19,10 @@ const getPage = function(url, retries) {
 					O.requestURL = url;
 					logger.debug('getPage Success for ' + url);
 					resolve(O);
-				} else {
+				} 
+				else {
 					if (retries > 0) {
-						logger.debug('getPage Retry for ' + url + '. remaining: ' + (retries - 1));
+						logger.debug('getPage Retry for ' + url + '. current status: ' + response.statusCode + '. remaining: ' + (retries - 1));
 						return new Promise(function(resolve, reject) { 
 							return getPage(url, retries - 1);
 						})

@@ -56,7 +56,7 @@ const addToQueue = function(URL) {
 	logger.silly('addToQueue: ' + URL);
 
 	return queue.add(function() {
-		return checkWikiPage(URL).timeout(30000)// only give 30 seconds before moving on. TODO catch and process
+		return checkWikiPage(URL).timeout(30000)
 		.catch(function(err) {
 			logger.warn('Queue timed out on ' + URL)
 			throw err;

@@ -12,10 +12,13 @@ const checkWikiPage = function(pageURL, domain) {
 
 	return getPage(pageURL)
 	.catch(function(ex) {
-		logger.warn('checkWikiPage could not retrieve ' + pageURL)
+		logger.warn('checkWikiPage could not retrieve ' + pageURL);
 	})
 	.then(function(result){
 		return processWikiPage(result, domain)
+	})
+	.catch(function(ex) {
+		logger.warn('checkWikiPage could not process ' + pageURL);
 	});
 };
 

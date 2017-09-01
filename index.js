@@ -7,6 +7,8 @@ const linksFromList = require("./pageProcessor.js").linksFromList;
 const Promise = require('bluebird');
 const Queue = require('promise-queue')
 
+const TimeoutError = Promise.TimeoutError
+
 let hardLimit = 1000;
 
 const queue = new Queue(3, Infinity);
@@ -45,7 +47,7 @@ const monitor = function(domain, interval) {
 const addToQueue = function(URL) {
 	if (hardLimit <= 0) {
 		if (hardLimit == 0) {
-			logger.info('Hardlimit has been reached. No more pages will be added to queue.')
+			logger.info('Queue hardlimit has been reached. No more pages will be added to queue.')
 			hardLimit--;
 		}
 		return;
@@ -54,7 +56,11 @@ const addToQueue = function(URL) {
 	logger.silly('addToQueue: ' + URL);
 
 	return queue.add(function() {
-		return checkWikiPage(URL);
+		return checkWikiPage(URL).timeout(30000)// only give 30 seconds before moving on. TODO catch and process
+		.catch(function(err) {
+			logger.warn('Queue timed out on ' + URL)
+			throw err;
+		});  
 	})
 	.then(function(processedWikiPage) {
 		return processLinks(processedWikiPage);
@@ -63,7 +69,7 @@ const addToQueue = function(URL) {
 		return db.processedPageInsert(processedWikiPage);	
 	})
 	.catch(function(err) {
-		logger.warn(JSON.stringify(err))
+		logger.warn('Queue error for ' + URL + ' ' + JSON.stringify(err))
 	})
 	.then(function(result) {
 		logger.verbose('Completed ' + URL);

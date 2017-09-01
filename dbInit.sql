@@ -4,6 +4,7 @@ USE wikiGraph;
 
 DROP PROCEDURE pageInsert;
 DROP PROCEDURE filterByProcessed;
+DROP PROCEDURE getUnprocessed;
 DROP TABLE link;
 DROP TABLE redirect;
 DROP TABLE page;
@@ -137,5 +138,33 @@ CREATE PROCEDURE filterByProcessed (
 
 		  SET unprocessed = MID(unprocessed, 2, LENGTH(unprocessed));
 		  SET processed = MID(processed, 2, LENGTH(processed));
+	END //
+
+CREATE PROCEDURE getUnprocessed (
+	    wiki varchar(4),
+	    maxRows int,
+		staleTime timestamp,
+		OUT unprocessed varchar(65535)
+	)
+	BEGIN
+		SET unprocessed = '';
+		
+		IF maxRows IS NULL OR maxRows = 0 THEN
+			SET maxRows = 10;
+		END IF;
+
+		IF staleTime IS NULL OR staleTime = '0000-00-00 00:00:00' THEN
+			SET staleTime = CURRENT_TIMESTAMP - INTERVAL 1 DAY;
+		END IF;
+
+		INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', maxRows, ' ', staleTime));
+
+		SET unprocessed = CONCAT('', (SELECT GROUP_CONCAT(limiter.fullname SEPARATOR ';') FROM (
+			SELECT p.fullname FROM page p
+				WHERE p.wiki = wiki
+			    AND p.processed = 0 OR (p.processTime < staleTime)
+			    ORDER BY p.processTime DESC 
+			    LIMIT maxRows) limiter));
+		INSERT INTO scratch(val) VALUES(unprocessed);
 	END //
 DELIMITER ;

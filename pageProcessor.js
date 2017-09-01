@@ -62,7 +62,7 @@ const processWikiPage = function($, domain) {
 		.then(function(result){
 			return new Promise(function(resolve, reject) { 
 				try {
-					processedWikiPage.links = result.rows[result.rows.length-1][0]['@unprocessed'].split(';').map(function(val) {return getFullWikiLink(val, processedWikiPage.domain)}).filter(function(link){return link !== 'https://sco.wikipedia.org/wiki/';});;
+					processedWikiPage.links = linksFromList(result.rows[result.rows.length-1][0]['@unprocessed'], domain).filter(function(link){return link !== 'https://sco.wikipedia.org/wiki/';});;
 					processedWikiPage.processedLinks = result.rows[result.rows.length-1][0]['@processed'].split(';').map(function(val) {return getFullWikiLink(val, processedWikiPage.domain)});
 					logger.debug('Processed page ' + processedWikiPage.URL + '. Found unprocessed links: ' + JSON.stringify(processedWikiPage.links));
 					logger.silly('  links already processed: ' + processedWikiPage.processedLinks);
@@ -146,9 +146,23 @@ const isFollowLink = function(URL, domain) {
 	}
 };
 
+//takes delimited string of shortnames, returns array of full URLs
+const linksFromList = function(list, domain, del) {
+	del = (typeof del !== 'undefined') ?  del : ';';
+	try {
+		return list.split(del).map(function(val) {return getFullWikiLink(val, domain)});
+	}
+	catch(ex) {
+		logger.debug('Failed to parse link list(' + domain + '): ' + list);
+		return [];
+	}
+
+};
+
 exports.checkWikiPage = checkWikiPage;
 exports.processWikiPage = processWikiPage;
 exports.isDomainLink = isDomainLink;
 exports.isFollowLink = isFollowLink;
 exports.getFullWikiLink = getFullWikiLink;
+exports.linksFromList = linksFromList;
 exports.getShortName = getShortName;

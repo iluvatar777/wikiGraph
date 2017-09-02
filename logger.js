@@ -2,8 +2,7 @@
 
 const logger = require('winston');
 const strftime = require('strftime');
-
-//const config = require('config');
+const fs = require('fs');
 
 const tsFormat = () => strftime('%b %d, %Y %H:%M:%S.%L');
 logger.remove(logger.transports.Console);  
@@ -20,5 +19,10 @@ logger.add(logger.transports.File, {
 	datePattern: '.yyyy-MM-dd',
 	maxsize : 12500000	// 100 Mb
 });
+
+if (!fs.existsSync('logs')){
+	logger.info('Created logs dir.')
+    fs.mkdirSync('logs');
+}
 
 module.exports = logger;

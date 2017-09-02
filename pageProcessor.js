@@ -17,9 +17,6 @@ const checkWikiPage = function(pageURL, domain) {
 	.then(function(result){
 		return processWikiPage(result, domain)
 	})
-	.catch(function(ex) {
-		logger.warn('checkWikiPage could not process ' + pageURL);
-	});
 };
 
 const processWikiPage = function($, domain) {
@@ -89,13 +86,14 @@ const getWikiDomain = function(URL) {
 };
 
 const getFullWikiLink = function(URL, domain) {
+	const slp = URL.split('/')
 	if (!URL.includes('/')) {
 		return 'https://' + domain + '.wikipedia.org/wiki/' + URL;
     }
-	if ((''+URL.split('/')[1]) == 'wiki') {
+	if ((''+URL.spl[1]) == 'wiki') {
 		return 'https://' + domain + '.wikipedia.org' + URL;
     }
-	if ((''+URL.split('/')[0]).includes('wikipedia.org')) {
+	if ((''+URL.spl[0]).includes('wikipedia.org')) {
 		return 'https://' + URL;
     }
     return URL;

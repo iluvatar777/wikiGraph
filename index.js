@@ -55,6 +55,7 @@ const addToQueue = function(URL) {
 	hardLimit--;
 	logger.silly('addToQueue: ' + URL);
 
+	// TODO check if currently in queue first
 	return queue.add(function() {
 		return checkWikiPage(URL).timeout(30000)
 		.catch(function(err) {

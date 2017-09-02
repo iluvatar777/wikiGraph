@@ -5,9 +5,6 @@ SELECT COUNT(*), processed, isRedirect FROM page
 						 
 SELECT * FROM page p;
 
-SELECT * FROM page p WHERE isRedirect = 1;
-
-
 SELECT l.source, l.destination, l.processTime, s.fullname, s.processed, d.fullname, d.processed 
 	FROM link l JOIN page s JOIN page d 
 	ON l.source = s.id AND l.destination = d.id;
@@ -15,7 +12,7 @@ SELECT l.source, l.destination, l.processTime, s.fullname, s.processed, d.fullna
 SELECT l.source, l.destination, l.processTime, s.fullname, d.fullname, d.processed 
 	FROM link l JOIN page s JOIN page d 
 	ON l.source = s.id AND l.destination = d.id
-    WHERE s.fullname = 'Electron' OR d.fullname = 'Electron';    
+    WHERE s.fullname = 'Montevago' OR d.fullname = 'Montevago';    
     
 SELECT COUNT(*), p.fullname FROM link l JOIN page p ON l.source = p.id   
 	GROUP BY p.fullname

@@ -87,7 +87,7 @@ const processLinks = function(processedWikiPage) {
 	});
 };
 
-//logger.info('adding main page to queue');
-//addToQueue('https://sco.wikipedia.org/wiki/Main_Page')
+logger.info('adding main page to queue');
+addToQueue('https://sco.wikipedia.org/wiki/Main_Page')
 
 monitor('sco', 1000);

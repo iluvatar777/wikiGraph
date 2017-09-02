@@ -44,7 +44,7 @@ const processWikiPage = function($, domain) {
 		$('a').each(function (i, elem) {
 			const URL = $(this).attr('href');
 
-			//logger.debug(''+isFollowLink(URL, domain)+'|'+isDomainLink(URL, domain)+'|'+isSpecialLink(URL, domain)+'|'+isDiscardLink(URL, domain)+'|'+URL)
+			//logger.silly(''+isFollowLink(URL, domain)+'|'+isDomainLink(URL, domain)+'|'+isSpecialLink(URL, domain)+'|'+isDiscardLink(URL, domain)+'|'+URL)
 			if (isFollowLink(URL, domain)) {
 				processedWikiPage.links.push(getFullWikiLink(URL, domain)); //TODO handle redirects
 			} else if (isSpecialLink(URL, domain)) {
@@ -86,14 +86,14 @@ const getWikiDomain = function(URL) {
 };
 
 const getFullWikiLink = function(URL, domain) {
-	const slp = URL.split('/')
+	const spl = URL.split('/')
 	if (!URL.includes('/')) {
 		return 'https://' + domain + '.wikipedia.org/wiki/' + URL;
     }
-	if ((''+URL.spl[1]) == 'wiki') {
+	if ((''+spl[1]) == 'wiki') {
 		return 'https://' + domain + '.wikipedia.org' + URL;
     }
-	if ((''+URL.spl[0]).includes('wikipedia.org')) {
+	if ((''+spl[0]).includes('wikipedia.org')) {
 		return 'https://' + URL;
     }
     return URL;
@@ -163,7 +163,9 @@ const linksFromList = function(list, domain, del) {
 exports.checkWikiPage = checkWikiPage;
 exports.processWikiPage = processWikiPage;
 exports.isDomainLink = isDomainLink;
+exports.isDiscardLink = isDiscardLink;
 exports.isFollowLink = isFollowLink;
+exports.isSpecialLink = isSpecialLink;
 exports.getFullWikiLink = getFullWikiLink;
-exports.linksFromList = linksFromList;
 exports.getShortName = getShortName;
+exports.linksFromList = linksFromList;

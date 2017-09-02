@@ -22,6 +22,13 @@ const getPage = function(url, retries) {
 					logger.debug('getPage Success for ' + url + '. in ' + (diff[0]+diff[1]/1e9) + 's.');
 					resolve(O);
 				} 
+				else if (!err && response.statusCode == 404 && response.body.includes('<!DOCTYPE')) {
+					const O = cheerio.load(body);
+					O.requestURL = url;
+					O.exists = 0;
+					logger.debug('getPage Success for non-existent wiki page ' + url + '. in ' + (diff[0]+diff[1]/1e9) + 's.');
+					resolve(O);
+				}
 				else {
 					if (retries > 0) {
 						logger.debug('getPage Retry for ' + url + '. current status: ' + response.statusCode + '. remaining: ' + (retries - 1) + ' ' + (diff[0]+diff[1]/1e9) + 's.');

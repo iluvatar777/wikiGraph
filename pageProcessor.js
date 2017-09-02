@@ -24,14 +24,14 @@ const processWikiPage = function($, domain) {
 		const isRedirect = $('#contentSub > span.mw-redirectedfrom').length > 0;
 
 		// TODO only relevent for redlinks, currently not loading these. <a href="/w/index.php?title=Nuclear_force&amp;action=edit&amp;redlink=1" class="new" title="Nuclear force (page disna exeest)">nuclear force</a>
-		//const exists = $('#mw-content-text  > div.mw-newarticletextanon, #mw-content-text  > div.noarticletext').length == 0;
+		const exists = (typeof $.exists !== 'number' && $.exists !== 0);
 
 		const pageName = getShortName($.requestURL);
 		let processedWikiPage = {	links: [], 
 									//specialLinks: [], 
 									//nonDomainLinks: [], 
 									domain: domain,
-									//exists: exists,
+									exists: exists,
 									isRedirect: isRedirect,
 									URL: $.requestURL,
 									pageName: pageName
@@ -41,16 +41,18 @@ const processWikiPage = function($, domain) {
 			logger.debug('redirect found: ' + processedWikiPage.URL);
 		}
 
-		$('a').each(function (i, elem) {
-			const URL = $(this).attr('href');
+		if (exists) { // Don't add any links (Main_Page) for DNE pages
+			$('a').each(function (i, elem) {
+				const URL = $(this).attr('href');
 
-			//logger.silly(''+isFollowLink(URL, domain)+'|'+isDomainLink(URL, domain)+'|'+isSpecialLink(URL, domain)+'|'+isDiscardLink(URL, domain)+'|'+URL)
-			if (isFollowLink(URL, domain)) {
-				processedWikiPage.links.push(getFullWikiLink(URL, domain)); //TODO handle redirects
-			} else if (isSpecialLink(URL, domain)) {
-				//processedWikiPage.specialLinks.push(getFullWikiLink(URL, domain));
-			}
-		});
+				//logger.silly(''+isFollowLink(URL, domain)+'|'+isDomainLink(URL, domain)+'|'+isSpecialLink(URL, domain)+'|'+isDiscardLink(URL, domain)+'|'+URL)
+				if (isFollowLink(URL, domain)) {
+					processedWikiPage.links.push(getFullWikiLink(URL, domain)); //TODO handle redirects
+				} else if (isSpecialLink(URL, domain)) {
+					//processedWikiPage.specialLinks.push(getFullWikiLink(URL, domain));
+				}
+			});
+		}
 		processedWikiPage.links = processedWikiPage.links.filter(function(value, index, self) {return (self.indexOf(value) === index && value !== processedWikiPage.URL);})
 		resolve(processedWikiPage);
 	})

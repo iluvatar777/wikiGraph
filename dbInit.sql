@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS page (
 	fullname varchar(255) NOT NULL,	
 	processed boolean DEFAULT 0,
 	isRedirect boolean DEFAULT 0,
+	exist boolean DEFAULT 1,
 	processTime timestamp DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,	
 	PRIMARY KEY (id),
 	UNIQUE (wiki, fullname)
@@ -58,6 +59,7 @@ CREATE PROCEDURE pageInsert (
 	    wiki varchar(4),
 		fullname varchar(255),	
 		isRedirect boolean,
+		exist boolean,
 		linkList varchar(65535)
 	)
 	BEGIN
@@ -65,8 +67,8 @@ CREATE PROCEDURE pageInsert (
 		DECLARE SubStrLen INT DEFAULT 0;
 		DECLARE linkStr   varchar(255) DEFAULT NULL;
 
-		INSERT INTO page(wiki, fullname, isRedirect, processed) VALUES(wiki, fullname, isRedirect, 1) 
-			ON DUPLICATE KEY UPDATE processed = 1, processTime = CURRENT_TIMESTAMP, isRedirect = isRedirect;
+		INSERT INTO page(wiki, fullname, isRedirect, exist, processed) VALUES(wiki, fullname, isRedirect, exist, 1) 
+			ON DUPLICATE KEY UPDATE processed = 1, processTime = CURRENT_TIMESTAMP, isRedirect = isRedirect, exist = exist;
 		SELECT id INTO @sourceId FROM page p WHERE p.wiki = wiki AND p.fullname = fullname;
 
 		IF linkList IS NULL THEN

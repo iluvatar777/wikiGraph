@@ -89,5 +89,6 @@ const processLinks = function(processedWikiPage) {
 
 logger.info('adding main page to queue');
 addToQueue('https://sco.wikipedia.org/wiki/Main_Page')
+addToQueue('https://sco.wikipedia.org/wiki/Louis_Gaucher,_Duke_o_Châtillon')
 
 monitor('sco', 1000);

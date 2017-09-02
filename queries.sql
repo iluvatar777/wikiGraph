@@ -1,7 +1,7 @@
 USE wikiGraph;
 		  
-SELECT COUNT(*), processed, isRedirect FROM page 
-	GROUP BY processed, isRedirect;
+SELECT COUNT(*), processed, isRedirect, exist FROM page 
+	GROUP BY processed, isRedirect, exist;
 						 
 SELECT * FROM page p;
 
@@ -12,7 +12,7 @@ SELECT l.source, l.destination, l.processTime, s.fullname, s.processed, d.fullna
 SELECT l.source, l.destination, l.processTime, s.fullname, d.fullname, d.processed 
 	FROM link l JOIN page s JOIN page d 
 	ON l.source = s.id AND l.destination = d.id
-    WHERE s.fullname = 'Montevago' OR d.fullname = 'Montevago';    
+    WHERE s.fullname = 'Louis_Gaucher,_Duke_o_Châtillon' OR d.fullname = 'Louis_Gaucher,_Duke_o_Châtillon';    
     
 SELECT COUNT(*), p.fullname FROM link l JOIN page p ON l.source = p.id   
 	GROUP BY p.fullname

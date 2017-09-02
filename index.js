@@ -29,7 +29,7 @@ const monitor = function(domain, interval) {
 
 	if (queueSize <= 1) {
 		logger.info('Monitor loading pages from db for processing');
-		db.query('CALL getUnprocessed(?,?,?,@unprocessed); SELECT @unprocessed;', [domain, 'NULL', 'NULL'], 'monitor')
+		db.query('CALL getUnprocessed(?,?,?,@unprocessed); SELECT @unprocessed;', [domain, 0, '0000-00-00 00:00:00'], 'monitor')
 		.then(function(result){
 			const links = linksFromList(result.rows[result.rows.length-1][0]['@unprocessed'], domain);
 			for(let i = 0; i < links.length; i++) {

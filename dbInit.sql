@@ -9,10 +9,10 @@ DROP TABLE link;
 DROP TABLE redirect;
 DROP TABLE page;
 
-DROP TABLE scratch;
-CREATE TABLE scratch (
-		val varchar(65535)
-);
+--DROP TABLE scratch;
+--CREATE TABLE scratch (
+--		val varchar(65535)
+--);
 --		INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId, '  ', linkList));
 --		INSERT INTO scratch(val) VALUES(CONCAT(linkStr, ': ', @pages, '  ', @pagesTEMP));
 --		IF linkStr LIKE '%,%' THEN
@@ -157,14 +157,11 @@ CREATE PROCEDURE getUnprocessed (
 			SET staleTime = CURRENT_TIMESTAMP - INTERVAL 1 DAY;
 		END IF;
 
-		INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', maxRows, ' ', staleTime));
-
 		SET unprocessed = CONCAT('', (SELECT GROUP_CONCAT(limiter.fullname SEPARATOR ';') FROM (
 			SELECT p.fullname FROM page p
 				WHERE p.wiki = wiki
 			    AND p.processed = 0 OR (p.processTime < staleTime)
 			    ORDER BY p.processTime DESC 
 			    LIMIT maxRows) limiter));
-		INSERT INTO scratch(val) VALUES(unprocessed);
 	END //
 DELIMITER ;

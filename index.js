@@ -9,7 +9,7 @@ const Queue = require('promise-queue')
 
 const TimeoutError = Promise.TimeoutError
 
-let hardLimit = 1000;
+let hardLimit = 100000;
 
 const queue = new Queue(3, Infinity);
 
@@ -27,7 +27,7 @@ const monitor = function(domain, interval) {
 
 	logger.verbose('Monitor. curently queued: ' + currQueued + '. pending: ' + pending + '. next check: ' + (interval / 1000) + 's.');
 
-	if (queueSize <= 1) {
+	if (queueSize <= 3) {
 		logger.info('Monitor loading pages from db for processing');
 		db.query('CALL getUnprocessed(?,?,?,@unprocessed); SELECT @unprocessed;', [domain, 0, '0000-00-00 00:00:00'], 'monitor')
 		.then(function(result){

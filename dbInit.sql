@@ -5,6 +5,7 @@ USE wikiGraph;
 DROP PROCEDURE pageInsert;
 DROP PROCEDURE filterByProcessed;
 DROP PROCEDURE getUnprocessed;
+DROP PROCEDURE recentlyProcessed;
 DROP TABLE link;
 DROP TABLE redirect;
 DROP TABLE page;
@@ -166,4 +167,28 @@ CREATE PROCEDURE getUnprocessed (
 			    ORDER BY p.processTime DESC 
 			    LIMIT maxRows) limiter));
 	END //
+
+CREATE PROCEDURE recentlyProcessed (
+	    wiki varchar(4),
+		fullname varchar(255),	
+		staleTime timestamp,
+		OUT recentlyProcessed boolean
+	)
+	BEGIN
+		DECLARE pages    INT DEFAULT 0;
+		SET recentlyProcessed = 0;
+
+		IF staleTime IS NULL OR staleTime = '0000-00-00 00:00:00' THEN
+			SET staleTime = CURRENT_TIMESTAMP - INTERVAL 1 DAY;
+		END IF;
+
+		SELECT @pages := COUNT(*) FROM page p
+			WHERE p.wiki = wiki AND p.fullname = fullname 
+			AND (p.processed = 1 AND p.processTime > staleTime);
+
+		IF @pages > 0 THEN
+			SET recentlyProcessed = 1;
+		END IF;
+	END //
+
 DELIMITER ;

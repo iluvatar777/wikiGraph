@@ -5,17 +5,32 @@ const logger = require('winston');
 const getPage = require("./pageRetriever.js").getPage;
 const db = require("./dbHandler.js");
 
+Promise.config({
+    cancellation: true,
+});
 
 const checkWikiPage = function(pageURL, domain) {
 	domain = (typeof domain !== 'undefined') ?  domain : getWikiDomain(pageURL);
 	//TODO clean URL, check if in DB, or if DB update needed.
+	const sql = "CALL recentlyProcessed(?,?,'0000-00-00 00:00:00', @recent); SELECT @recent"
 
-	return getPage(pageURL)
-	.catch(function(ex) {
-		logger.warn('checkWikiPage could not retrieve ' + pageURL);
-	})
+	return db.query(sql, [domain, getShortName(pageURL)], 'checkWikiPage')
 	.then(function(result){
-		return processWikiPage(result, domain)
+		const recent = result.rows[result.rows.length-1][0]['@recent'];
+		logger.silly('' + pageURL + ' recent: ' + recent);
+		
+		if (recent == 1) {
+			logger.warn('Canceling ' + pageURL + ', recently processed.')
+			checkWikiPage.cancel();
+		}
+
+		return getPage(pageURL)
+		.catch(function(ex) {
+			logger.warn('checkWikiPage could not retrieve ' + pageURL);
+		})
+		.then(function(result){
+			return processWikiPage(result, domain)
+		})
 	})
 };
 
@@ -60,7 +75,7 @@ const processWikiPage = function($, domain) {
 		const links = processedWikiPage.links.map(function(link){return getShortName(link)}).join(';')
 		const sql = "CALL filterByProcessed(?,?,?,@unprocessed,@processed); SELECT @unprocessed, @processed;"
 
-		return db.query(sql, [processedWikiPage.domain, links, '1970-01-01 01:00:00', 'a', 'b'], 'processWikiPage')
+		return db.query(sql, [processedWikiPage.domain, links, '1970-01-01 01:00:00', 'a', 'b'], 'processWikiPage') // TODO replace with 0000-00-00 00:00:00 and adjust default in proc
 		.then(function(result){
 			return new Promise(function(resolve, reject) { 
 				try {

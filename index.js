@@ -8,6 +8,9 @@ const Promise = require('bluebird');
 const Queue = require('promise-queue')
 
 const TimeoutError = Promise.TimeoutError
+Promise.config({
+    cancellation: true,
+});
 
 let hardLimit = 100000;
 
@@ -58,9 +61,8 @@ const addToQueue = function(URL) {
 	// TODO check if currently in queue first
 	return queue.add(function() {
 		return checkWikiPage(URL).timeout(30000)
-		.catch(function(err) {
+		.catch(TimeoutError, function(err) {
 			logger.warn('Queue timed out on ' + URL)
-			throw err;
 		});  
 	})
 	.then(function(processedWikiPage) {

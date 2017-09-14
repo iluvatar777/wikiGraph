@@ -60,7 +60,7 @@ const addToQueue = function(URL) {
 
 	// TODO check if currently in queue first
 	return queue.add(function() {
-		return checkWikiPage(URL).timeout(30000)
+		return checkWikiPage(URL).timeout(5000) //30000
 		.catch(TimeoutError, function(err) {
 			logger.warn('Queue timed out on ' + URL)
 		});  

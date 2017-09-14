@@ -11,16 +11,14 @@ Promise.config({
 
 const checkWikiPage = function(pageURL, domain) {
 	domain = (typeof domain !== 'undefined') ?  domain : getWikiDomain(pageURL);
-	//TODO clean URL, check if in DB, or if DB update needed.
 	const sql = "CALL recentlyProcessed(?,?,'0000-00-00 00:00:00', @recent); SELECT @recent"
 
 	return db.query(sql, [domain, getShortName(pageURL)], 'checkWikiPage')
 	.then(function(result){
+		// reduce http requests with a quick db check
 		const recent = result.rows[result.rows.length-1][0]['@recent'];
-		logger.silly('' + pageURL + ' recent: ' + recent);
-		
-		if (recent == 1) {
-			logger.warn('Canceling ' + pageURL + ', recently processed.')
+		if (recent == 1) { 
+			logger.verbose('Canceling ' + pageURL + ', recently processed.')
 			checkWikiPage.cancel();
 		}
 

@@ -70,7 +70,12 @@ const processWikiPage = function($, domain) {
 		resolve(processedWikiPage);
 	})
 	.then(function(processedWikiPage){ // now, check the database to see which links are still unprocessed.
-		const links = processedWikiPage.links.map(function(link){return getShortName(link)}).join(';')
+		const condUnescape = function(val){if (val.includes('%') && !val.includes('%25')){return decodeURIComponent(val);} return val; }
+		const links = processedWikiPage.links.map(function(link){
+													return condUnescape(getShortName(link))
+												}).join(';')
+
+
 		const sql = "CALL filterByProcessed(?,?,?,@unprocessed,@processed); SELECT @unprocessed, @processed;"
 
 		return db.query(sql, [processedWikiPage.domain, links, '1970-01-01 01:00:00', 'a', 'b'], 'processWikiPage') // TODO replace with 0000-00-00 00:00:00 and adjust default in proc
@@ -116,7 +121,7 @@ const getFullWikiLink = function(URL, domain) {
 
 const getShortName = function(URL) {
 	const spl = URL.split('/');
-    return decodeURI(spl[spl.length - 1]).split('#')[0];
+    return spl[spl.length - 1].split('#')[0];
 };
 
 const isDomainLink = function(URL, domain) {

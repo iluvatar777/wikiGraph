@@ -3,7 +3,7 @@ USE wikiGraph;
 SELECT COUNT(*), processed, isRedirect, exist FROM page 
 	GROUP BY processed, isRedirect, exist;
 						 
-SELECT * FROM page p;
+SELECT * FROM page p WHERE fullname LIKE 'UTC%';
 
 SELECT l.source, l.destination, l.processTime, s.fullname, s.processed, d.fullname, d.processed 
 	FROM link l JOIN page s JOIN page d 
@@ -12,7 +12,7 @@ SELECT l.source, l.destination, l.processTime, s.fullname, s.processed, d.fullna
 SELECT l.source, l.destination, l.processTime, s.fullname, d.fullname, d.processed 
 	FROM link l JOIN page s JOIN page d 
 	ON l.source = s.id AND l.destination = d.id
-    WHERE s.fullname = 'Louis_Gaucher,_Duke_o_Châtillon' OR d.fullname = 'Louis_Gaucher,_Duke_o_Châtillon';    
+    WHERE s.fullname LIKE 'UTC%' OR d.fullname LIKE 'UTC%';    
     
 SELECT COUNT(*), p.fullname FROM link l JOIN page p ON l.source = p.id   
 	GROUP BY p.fullname

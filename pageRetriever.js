@@ -12,8 +12,8 @@ const getPage = function(url, retries) {
 		logger.debug('GetPage attempt for ' + url);
 		const t0 = process.hrtime();
 		request.get({
-			    //url: encodeURI(url)
-			    url: url
+			    url: encodeURI(url)
+			    //url: url
 			}, 
 			function(err, response, body) {
 				const diff = process.hrtime(t0);

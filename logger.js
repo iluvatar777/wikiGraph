@@ -14,7 +14,7 @@ logger.add(logger.transports.Console, {
 logger.add(logger.transports.File, {
 	filename : 'logs/activity.log',
 	timestamp : tsFormat,
-	level : 'silly',
+	level : 'verbose',
 	json : false,
 	datePattern: '.yyyy-MM-dd',
 	maxsize : 12500000	// 100 Mb

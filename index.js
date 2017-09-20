@@ -12,9 +12,9 @@ Promise.config({
     cancellation: true,
 });
 
-let hardLimit = 100000;
+//let hardLimit = 100000;
 
-const queue = new Queue(3, Infinity);
+const queue = new Queue(10, Infinity);
 
 const monitor = function(domain, interval) {
 	interval = Math.min((typeof interval !== 'undefined') ?  interval : queue.getQueueLength() * 1000, 60000);
@@ -47,14 +47,14 @@ const monitor = function(domain, interval) {
 }
 
 const addToQueue = function(URL) {
-	if (hardLimit <= 0) {
+	/*if (hardLimit <= 0) {
 		if (hardLimit == 0) {
 			logger.info('Queue hardlimit has been reached. No more pages will be added to queue.')
 			hardLimit--;
 		}
 		return;
 	}
-	hardLimit--;
+	hardLimit--;*/
 	logger.silly('addToQueue: ' + URL);
 
 	// TODO check if currently in queue first

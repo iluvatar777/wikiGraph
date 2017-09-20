@@ -10,15 +10,15 @@ DROP TABLE link;
 DROP TABLE redirect;
 DROP TABLE page;
 
---DROP TABLE scratch;
---CREATE TABLE scratch (
---		val varchar(65535)
---);
---		INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId, '  ', linkList));
---		INSERT INTO scratch(val) VALUES(CONCAT(linkStr, ': ', @pages, '  ', @pagesTEMP));
---		IF linkStr LIKE '%,%' THEN
---			INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId, '  ', linkStr, '  ', linkList));
---		END IF;
+-- DROP TABLE scratch;
+-- CREATE TABLE scratch (
+-- 		val varchar(21845)
+-- );
+-- 		INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId, '  ', linkList));
+-- 		INSERT INTO scratch(val) VALUES(CONCAT(linkStr, ': ', @pages, '  ', @pagesTEMP));
+-- 		IF linkStr LIKE '%,%' THEN
+-- 			INSERT INTO scratch(val) VALUES(CONCAT(wiki, ' ', fullname, ' ', @sourceId, '  ', linkStr, '  ', linkList));
+-- 		END IF;
 
 
 
@@ -61,7 +61,7 @@ CREATE PROCEDURE pageInsert (
 		fullname varchar(255),	
 		isRedirect boolean,
 		exist boolean,
-		linkList varchar(65535)
+		linkList varchar(21845)
 	)
 	BEGIN
 		DECLARE strLen    INT DEFAULT 0;
@@ -98,10 +98,10 @@ CREATE PROCEDURE pageInsert (
 
 CREATE PROCEDURE filterByProcessed (
 	    wiki varchar(4),
-		linkList varchar(65535),
+		linkList varchar(21845),
 		staleTime timestamp,
-		OUT unprocessed varchar(65535),
-		OUT processed varchar(65535)
+		OUT unprocessed varchar(21845),
+		OUT processed varchar(21845)
 	)
 	BEGIN
 		DECLARE strLen    INT DEFAULT 0;
@@ -147,7 +147,7 @@ CREATE PROCEDURE getUnprocessed (
 	    wiki varchar(4),
 	    maxRows int,
 		staleTime timestamp,
-		OUT unprocessed varchar(65535)
+		OUT unprocessed varchar(21845)
 	)
 	BEGIN
 		SET unprocessed = '';

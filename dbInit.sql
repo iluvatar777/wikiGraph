@@ -202,5 +202,3 @@ SET db_collation 			= 'utf8_general_ci',
 	collation_connection	= 'utf8_general_ci',
     sql_mode				= 'NO_ENGINE_SUBSTITUTION'
 WHERE db = 'wikigraph';
-
-SELECT * FROM proc;

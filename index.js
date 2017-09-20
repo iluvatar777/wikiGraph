@@ -23,11 +23,6 @@ const monitor = function(domain, interval) {
 	const pending = queue.getPendingLength()
 	const queueSize = currQueued + pending;
 	
-	if (interval == 0) {
-		logger.info('Monitor finished.')
-		return;
-	}
-
 	logger.verbose('Monitor. curently queued: ' + currQueued + '. pending: ' + pending + '. next check: ' + (interval / 1000) + 's.');
 
 	if (queueSize <= 3) {
@@ -39,6 +34,10 @@ const monitor = function(domain, interval) {
 				addToQueue(links[i]);
 			}
 			logger.info('Monitor added ' + links.length + ' pages to queue.');
+			if (interval == 0 && links.length == 0) {
+				logger.info('Monitor going to sleep. Resuming in 30 minutes')
+				interval = 30 * 60 * 1000;
+			}
 			setTimeout(monitor, interval);
 		});
 	}

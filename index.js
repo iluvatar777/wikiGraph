@@ -29,7 +29,9 @@ const monitor = function(domain, interval) {
 		logger.info('Monitor loading pages from db for processing');
 		db.query('CALL getUnprocessed(?,?,?,@unprocessed); SELECT @unprocessed;', [domain, 0, '0000-00-00 00:00:00'], 'monitor')
 		.then(function(result){
-			const links = linksFromList(result.rows[result.rows.length-1][0]['@unprocessed'], domain);
+			const rawLinks = result.rows[result.rows.length-1][0]['@unprocessed'];
+			const links = linksFromList(rawLinks, domain);
+			logger.debug('Monitor adding unprocessed: ' + JSON.stringify(rawLinks));
 			for(let i = 0; i < links.length; i++) {
 				addToQueue(links[i]);
 			}

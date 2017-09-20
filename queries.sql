@@ -17,9 +17,11 @@ SELECT l.source, l.destination, l.processTime, s.fullname, d.fullname, d.process
 SELECT COUNT(*), p.fullname FROM link l JOIN page p ON l.source = p.id   
 	GROUP BY p.fullname
     ORDER BY COUNT(*) DESC;
-							
-                            
+							                            
 SELECT COUNT(*) AS 'COUNT(*) of link' FROM link;
+
+Call getUnprocessed('sco', 0, '0000-00-00 00:00:00', @unprocessedList);
+SELECT @unprocessedList;
 
 SET @binSize = 10;
 SELECT (numLinks DIV @binSize) * @binSize + 1 AS 'Bin', 

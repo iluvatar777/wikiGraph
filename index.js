@@ -14,10 +14,11 @@ Promise.config({
 
 //let hardLimit = 100000;
 
-const queue = new Queue(10, Infinity);
+const maxConcurrent = 10;
+const queue = new Queue(maxConcurrent, Infinity);
 
 const monitor = function(domain, interval) {
-	interval = Math.min((typeof interval !== 'undefined') ?  interval : queue.getQueueLength() * 1000, 60000);
+	interval = Math.max(Math.min((typeof interval !== 'undefined') ?  interval : queue.getQueueLength() / maxConcurrent * 1000, 60000), 1000);
 
 	const currQueued = queue.getQueueLength()
 	const pending = queue.getPendingLength()
@@ -25,26 +26,26 @@ const monitor = function(domain, interval) {
 	
 	logger.verbose('Monitor. curently queued: ' + currQueued + '. pending: ' + pending + '. next check: ' + (interval / 1000) + 's.');
 
-	if (queueSize <= 3) {
+	if (queueSize + 2 < maxConcurrent) {
 		logger.info('Monitor loading pages from db for processing');
-		db.query('CALL getUnprocessed(?,?,?,@unprocessed); SELECT @unprocessed;', [domain, 0, '0000-00-00 00:00:00'], 'monitor')
+		db.query('CALL getUnprocessed(?,?,?,@unprocessed); SELECT @unprocessed;', [domain, 50, '0000-00-00 00:00:00'], 'monitor')
 		.then(function(result){
 			const rawLinks = result.rows[result.rows.length-1][0]['@unprocessed'];
 			const links = linksFromList(rawLinks, domain);
-			logger.debug('Monitor adding unprocessed: ' + JSON.stringify(rawLinks));
+			logger.debug('Monitor adding unprocessed for ' + domain + ': ' + JSON.stringify(rawLinks));
 			for(let i = 0; i < links.length; i++) {
 				addToQueue(links[i]);
 			}
 			logger.info('Monitor added ' + links.length + ' pages to queue.');
 			if (interval == 0 && links.length == 0) {
-				logger.info('Monitor going to sleep. Resuming in 30 minutes')
+				logger.info('Monitor going to sleep. Waking in 30 minutes')
 				interval = 30 * 60 * 1000;
 			}
-			setTimeout(monitor, interval);
+			setTimeout(monitor, interval, domain);
 		});
 	}
 	else {
-		setTimeout(monitor, interval);
+		setTimeout(monitor, interval, domain);
 	}
 }
 

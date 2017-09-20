@@ -164,7 +164,7 @@ CREATE PROCEDURE getUnprocessed (
 			SELECT p.fullname FROM page p
 				WHERE p.wiki = wiki
 			    AND p.processed = 0 OR (p.processTime < staleTime)
-			    ORDER BY p.processTime DESC 
+			    ORDER BY p.fullname 
 			    LIMIT maxRows) limiter));
 	END //
 

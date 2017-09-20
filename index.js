@@ -18,13 +18,12 @@ const maxConcurrent = 10;
 const queue = new Queue(maxConcurrent, Infinity);
 
 const monitor = function(domain, interval) {
-	interval = Math.max(Math.min((typeof interval !== 'undefined') ?  interval : queue.getQueueLength() / maxConcurrent * 1000, 60000), 1000);
-
 	const currQueued = queue.getQueueLength()
 	const pending = queue.getPendingLength()
 	const queueSize = currQueued + pending;
-	
-	logger.verbose('Monitor. curently queued: ' + currQueued + '. pending: ' + pending + '. next check: ' + (interval / 1000) + 's.');
+	interval = Math.min((typeof interval !== 'undefined') ?  interval : currQueued / maxConcurrent * 1000, 60000);
+
+	logger.verbose('Monitor. curently queued: ' + currQueued + '. pending: ' + pending + '. next check: ' + (Math.max(interval, 1000) / 1000) + 's.');
 
 	if (queueSize < maxConcurrent * 1000) {
 		logger.info('Monitor loading pages from db for processing');
@@ -37,15 +36,15 @@ const monitor = function(domain, interval) {
 				addToQueue(links[i]);
 			}
 			logger.info('Monitor added ' + links.length + ' pages to queue.');
-			if (interval == 0 && links.length == 0) {
+			if (interval == 1000 && links.length == 0) {
 				logger.info('Monitor going to sleep. Waking in 30 minutes')
 				interval = 30 * 60 * 1000;
 			}
-			setTimeout(monitor, interval, domain);
+			setTimeout(monitor, Math.max(interval, 1000), domain);
 		});
 	}
 	else {
-		setTimeout(monitor, interval, domain);
+		setTimeout(monitor, Math.max(interval, 1000), domain);
 	}
 }
 

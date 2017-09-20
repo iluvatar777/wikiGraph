@@ -2,13 +2,13 @@ CREATE DATABASE IF NOT EXISTS wikiGraph;
 
 USE wikiGraph;
 
-DROP PROCEDURE pageInsert;
-DROP PROCEDURE filterByProcessed;
-DROP PROCEDURE getUnprocessed;
-DROP PROCEDURE recentlyProcessed;
-DROP TABLE link;
-DROP TABLE redirect;
-DROP TABLE page;
+DROP PROCEDURE IF EXISTS pageInsert;
+DROP PROCEDURE IF EXISTS filterByProcessed;
+DROP PROCEDURE IF EXISTS getUnprocessed;
+DROP PROCEDURE IF EXISTS recentlyProcessed;
+DROP TABLE IF EXISTS link;
+DROP TABLE IF EXISTS redirect;
+DROP TABLE IF EXISTS page;
 
 -- DROP TABLE scratch;
 -- CREATE TABLE scratch (

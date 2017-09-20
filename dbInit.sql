@@ -192,3 +192,15 @@ CREATE PROCEDURE recentlyProcessed (
 	END //
 
 DELIMITER ;
+
+-- workaround differences in maria deafults 10.1.22 (Mac) and 10.1.23 (Windows)
+USE mysql;
+
+UPDATE proc 
+SET db_collation 			= 'utf8_general_ci',
+	character_set_client 	= 'utf8',
+	collation_connection	= 'utf8_general_ci',
+    sql_mode				= 'NO_ENGINE_SUBSTITUTION'
+WHERE db = 'wikigraph';
+
+SELECT * FROM proc;

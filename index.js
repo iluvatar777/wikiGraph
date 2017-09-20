@@ -26,9 +26,9 @@ const monitor = function(domain, interval) {
 	
 	logger.verbose('Monitor. curently queued: ' + currQueued + '. pending: ' + pending + '. next check: ' + (interval / 1000) + 's.');
 
-	if (queueSize + 2 < maxConcurrent) {
+	if (queueSize < maxConcurrent * 1000) {
 		logger.info('Monitor loading pages from db for processing');
-		db.query('CALL getUnprocessed(?,?,?,@unprocessed); SELECT @unprocessed;', [domain, 50, '0000-00-00 00:00:00'], 'monitor')
+		db.query('CALL getUnprocessed(?,?,?,@unprocessed); SELECT @unprocessed;', [domain, maxConcurrent * 5, '0000-00-00 00:00:00'], 'monitor')
 		.then(function(result){
 			const rawLinks = result.rows[result.rows.length-1][0]['@unprocessed'];
 			const links = linksFromList(rawLinks, domain);

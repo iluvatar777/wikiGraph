@@ -204,4 +204,4 @@ SET db_collation 			= 'utf8_general_ci',
 WHERE db = 'wikigraph';
 
 -- address GROUP_CONCAT() issue for getUnprocessed
-SET group_concat_max_len = 21845;
+SET GLOBAL group_concat_max_len = 21845;

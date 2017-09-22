@@ -14,7 +14,7 @@ Promise.config({
 
 //let hardLimit = 100000;
 
-const maxConcurrent = 10;
+const maxConcurrent = 5;
 const queue = new Queue(maxConcurrent, Infinity);
 
 const monitor = function(domain, interval) {
@@ -36,7 +36,7 @@ const monitor = function(domain, interval) {
 				addToQueue(links[i]);
 			}
 			logger.info('Monitor added ' + links.length + ' pages to queue.');
-			if (interval == 1000 && links.length == 0) {
+			if (interval == 0 && links.length == 0) {
 				logger.info('Monitor going to sleep. Waking in 30 minutes')
 				interval = 30 * 60 * 1000;
 			}
